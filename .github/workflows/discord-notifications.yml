@@ -18,7 +18,7 @@ jobs:
             const pr = context.payload.pull_request;
 
             const payload = {
-              username: "Captain Hook",
+              username: "Aumigo Bot",
               avatar_url: "https://gravatar.com/avatar/7dfb35899d7784b5711ad6aaf7ccf652?s=400&d=robohash&r=x",
               embeds: [{
                 title: `Pull Request ${eventType}!`,
