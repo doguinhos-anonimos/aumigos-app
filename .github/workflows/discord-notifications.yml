@@ -1,0 +1,50 @@
+name: Discord Notifications
+
+on:
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  notify_discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Discord
+        if: github.event.pull_request.merged == true || github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const eventType = context.payload.pull_request.merged ? 'closed' : 'opened';
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+
+            const payload = {
+              username: "Fiapo de Manga Bot",
+              avatar_url: "https://cdn.discordapp.com/attachments/1351305391929036964/1413370691583213588/image.png?ex=68bbaf88&is=68ba5e08&hm=f8eced7d4e875e8126afca8e7c0c1d1f43db60b4642ad93a869817f988ac6d1a&",
+              embeds: [{
+                title: `Pull Request ${eventType}!`,
+                description: `**${pr.title}**\n${pr.body?.substring(0, 100) || ''}${pr.body?.length > 100 ? '...' : ''}`,
+                url: pr.html_url,
+                color: eventType === 'mergeado' ? 5763719 : 15105570,
+                author: {
+                  name: pr.user.login,
+                  url: pr.user.html_url,
+                  icon_url: pr.user.avatar_url
+                },
+                fields: [
+                  { name: "Repositório", value: `${owner}/${repo}`, inline: true },
+                  { name: "Branch", value: pr.head.ref, inline: true }
+                ],
+                footer: {
+                  text: `PR #${pr.number}`
+                },
+                timestamp: new Date().toISOString()
+              }]
+            };
+
+            await fetch('https://discord.com/api/webhooks/1413364412387168266/q-S_72HsXtiEBnqRR0-aIRW37BigZKKpmzYgp19ZBzBiy68AVppQx1L2q9ImaPAPl5Yr', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload)
+            });
